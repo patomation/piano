@@ -7,7 +7,7 @@
         "noImplicitAny": false,
         "declaration": false,
         "outDir": "dist",
-        "sourceMap": true,
+        "sourceMap": true
     },
     "include": ["src/**/*"],
     "exclude": ["node_modules", "**/*.spec.ts",  "**/*.d.ts"]
