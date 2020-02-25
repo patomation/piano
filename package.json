@@ -7,7 +7,7 @@
   "scripts": {
     "start": "webpack-dev-server --mode development --open --hot",
     "build": "webpack --mode production",
-    "lint": "./node_modules/.bin/eslint .",
+    "lint": "./node_modules/.bin/eslint **/*.{js,ts,tsx}",
     "test": "jest",
     "coverage": "jest --coverage"
   },
