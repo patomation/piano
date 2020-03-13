@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { useEffect, ReactElement } from 'react'
+import { useState, useEffect, ReactElement } from 'react'
 // import hotkey from '@patomation/hotkey/lib/index.esm.js'
 import hotkey from '@patomation/hotkey'
 
@@ -56,27 +56,34 @@ const Piano = ({
   // Piano Data
   const piano = generatePiano(startOctive, totalOctives)
 
+  const [isMouseDown, setIsMouseDown] = useState(false)
+
   useEffect(() => {
     // assign hotkeys
     hotkeyConfig.forEach((key, index) => {
+      const { frequency } = piano[index]
       hotkey(key)
         .down(() => {
-          const { frequency } = piano[index]
           onDown(frequency)
         })
         .up(() => {
-          onUp()
+          onUp(frequency)
         })
     })
   }, [hotkey, piano])
 
   const width = 100 / (7 * totalOctives)
   return (
-    <div style={{
-      display: 'flex',
-      height: '100%',
-      width: '100%'
-    }}>
+    <div
+      style={{
+        display: 'flex',
+        height: '100%',
+        width: '100%'
+      }}
+      onMouseLeave={(): void => {
+        // Bug fix: when mouse leaves window and mouse up is not detected and come back prevents sound from sustaining
+        setIsMouseDown(false)
+      }}>
       {piano.map(({ note, frequency, kind }, index) =>
         <button
           key={note}
@@ -107,9 +114,21 @@ const Piano = ({
           }}
           onMouseDown={(): void => {
             onDown(frequency)
+            setIsMouseDown(true)
           }}
           onMouseUp={(): void => {
-            onUp()
+            onUp(frequency)
+            setIsMouseDown(false)
+          }}
+          onMouseEnter={(): void => {
+            if (isMouseDown === true) {
+              onDown(frequency)
+            }
+          }}
+          onMouseLeave={(): void => {
+            if (isMouseDown === true) {
+              onUp(frequency)
+            }
           }}
         >
           <div>
