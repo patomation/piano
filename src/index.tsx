@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { render } from 'react-dom'
-import { useState, useEffect, FormEvent, ReactElement } from 'react'
-import { X } from 'xsound'
+import { useState, FormEvent, ReactElement } from 'react'
 import Piano from './components/Piano'
 import './sass/main.scss'
 import './images/icons/favicon.ico'
+import synth from './synth'
 
 // Disable Context Menu
 // document.addEventListener('contextmenu', event => event.preventDefault())
@@ -13,22 +13,14 @@ if (module && module.hot) {
   module.hot.accept()
 }
 
-export type PlayNote = (arg0: number) => void
-export type ReleaseNote = () => void
-
-X('oscillator').setup(true)
-X('oscillator', 0)
-  .param({
-    type: 'sawtooth',
-    gain: 1
-  })
-X('oscillator').module('equalizer').state(true)
+export type PlayNote = (frequency: number) => void
+export type ReleaseNote = (frequency: number) => void
 
 const playNote: PlayNote = (frequency) => {
-  X('oscillator').start(frequency)
+  synth.play(frequency)
 }
-const releaseNote: ReleaseNote = (): void => {
-  X('oscillator').stop()
+const releaseNote: ReleaseNote = (frequency): void => {
+  synth.stop(frequency)
 }
 
 const App = (): ReactElement => {
@@ -39,24 +31,6 @@ const App = (): ReactElement => {
   const [middle, setMiddle] = useState(0)
   const [treble, setTreble] = useState(0)
   const [presence, setPresence] = useState(0)
-
-  // const .module('equalizer').param('bass', event.currentTarget.valueAsNumber);
-
-  useEffect(() => {
-    X('oscillator').param('mastervolume', masterVolume)
-  }, [masterVolume, X])
-  useEffect(() => {
-    X('oscillator').module('equalizer').param('bass', bass)
-  }, [bass, X])
-  useEffect(() => {
-    X('oscillator').module('equalizer').param('middle', middle)
-  }, [middle, X])
-  useEffect(() => {
-    X('oscillator').module('equalizer').param('treble', treble)
-  }, [treble, X])
-  useEffect(() => {
-    X('oscillator').module('equalizer').param('presence', presence)
-  }, [presence, X])
 
   return (
     <div style={{
@@ -125,12 +99,11 @@ const App = (): ReactElement => {
         onDown={(frequency: number): void => {
           playNote(frequency)
         }}
-        onUp={(): void => {
-          releaseNote()
+        onUp={(frequency: number): void => {
+          releaseNote(frequency)
         }}
         totalOctives={totalOctives}
         startOctive={startOctive}
-
       />
     </div>
   )
