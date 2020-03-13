@@ -1,9 +1,11 @@
 import * as React from 'react'
-import { ReactElement } from 'react'
+import { useEffect, ReactElement } from 'react'
+// import hotkey from '@patomation/hotkey/lib/index.esm.js'
+import hotkey from '@patomation/hotkey'
 
 export interface PianoProps {
   onDown: (arg0: number) => void
-  onUp: (arg0: number) => void
+  onUp: (arg0?: number) => void
   startOctive?: number
   totalOctives?: number
 }
@@ -41,12 +43,33 @@ export const generatePiano: GeneratePiano = (startOctive = 1, totalOctives = 1) 
   return array
 }
 
+const hotkeyConfig = [
+  'z', 's', 'x', 'd', 'c', 'v', 'g', 'b', 'h', 'n', 'j', 'm'
+]
+
 const Piano = ({
   onDown,
   onUp,
   totalOctives = 1,
   startOctive = 1
 }: PianoProps): ReactElement => {
+  // Piano Data
+  const piano = generatePiano(startOctive, totalOctives)
+
+  useEffect(() => {
+    // assign hotkeys
+    hotkeyConfig.forEach((key, index) => {
+      hotkey(key)
+        .down(() => {
+          const { frequency } = piano[index]
+          onDown(frequency)
+        })
+        .up(() => {
+          onUp()
+        })
+    })
+  }, [hotkey, piano])
+
   const width = 100 / (7 * totalOctives)
   return (
     <div style={{
@@ -54,7 +77,7 @@ const Piano = ({
       height: '100%',
       width: '100%'
     }}>
-      {generatePiano(startOctive, totalOctives).map(({ note, frequency, kind }) =>
+      {piano.map(({ note, frequency, kind }, index) =>
         <button
           key={note}
           style={{
@@ -86,10 +109,17 @@ const Piano = ({
             onDown(frequency)
           }}
           onMouseUp={(): void => {
-            onUp(frequency)
+            onUp()
           }}
         >
-          {note}
+          <div>
+            <div>
+              {hotkeyConfig[index]}
+            </div>
+            <div>
+              {note}
+            </div>
+          </div>
 
         </button>
       )}
